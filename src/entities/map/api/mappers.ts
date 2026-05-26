@@ -1,6 +1,13 @@
-import type { MockMapMarkerJson } from '@/mock/types';
+import type { MockMapLocationJson, MockMapMarkerJson } from '@/mock/types';
 
-import type { MapMarker } from '../model';
+import type { MapLocation, MapMarker } from '../model';
+
+export function mapMapLocationToJson(location: MapLocation): MockMapLocationJson {
+  return {
+    latitude: location.latitude,
+    longitude: location.longitude,
+  };
+}
 
 export function mapMapMarker(json: MockMapMarkerJson): MapMarker {
   return {

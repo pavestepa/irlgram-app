@@ -10,7 +10,10 @@
     "platforms": ["ios", "android"],
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.anonymous.irlgram-app"
+      "bundleIdentifier": "com.anonymous.irlgram-app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Приложению нужен доступ к геолокации для отображения вашего местоположения на карте."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,11 +22,18 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
     },
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Приложению нужен доступ к геолокации для отображения вашего местоположения на карте."
+        }
+      ],
       [
         "expo-splash-screen",
         {

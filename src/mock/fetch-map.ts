@@ -1,5 +1,5 @@
 import { getMockState } from './state';
-import type { MockMapMarkerJson } from './types';
+import type { MockMapLocationJson, MockMapMarkerJson } from './types';
 import { mockDelay } from './utils';
 
 export async function fetchMapMarkers(): Promise<MockMapMarkerJson[]> {
@@ -10,6 +10,45 @@ export async function fetchMapMarkers(): Promise<MockMapMarkerJson[]> {
       location: { ...marker.location },
     })),
   );
+}
+
+export async function fetchCurrentUserMarker(): Promise<MockMapMarkerJson | null> {
+  const state = getMockState();
+  const marker = state.mapMarkers.find((item) => item.user_id === state.currentUserId);
+
+  if (!marker) {
+    return mockDelay(null);
+  }
+
+  return mockDelay({
+    ...marker,
+    location: { ...marker.location },
+  });
+}
+
+export async function fetchUpdateCurrentUserLocation(
+  location: MockMapLocationJson,
+): Promise<MockMapMarkerJson> {
+  const state = getMockState();
+  const existingMarker = state.mapMarkers.find((item) => item.user_id === state.currentUserId);
+
+  if (existingMarker) {
+    existingMarker.location = { ...location };
+    return mockDelay({
+      ...existingMarker,
+      location: { ...existingMarker.location },
+    });
+  }
+
+  const marker: MockMapMarkerJson = {
+    id: `marker_${state.currentUserId}`,
+    user_id: state.currentUserId,
+    location: { ...location },
+    label: 'Я',
+  };
+
+  state.mapMarkers.push(marker);
+  return mockDelay({ ...marker });
 }
 
 export async function fetchUpdateMapMarker(

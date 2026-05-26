@@ -1,6 +1,8 @@
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 
+import { syncUserLocationOnAuth } from '@/entities/map/api';
+
 import { signIn as signInRequest, signOut as signOutRequest } from '../api';
 import { SESSION_CHECK_INTERVAL_MS } from '../model/constants';
 import { resolveSession } from '../model/session-service';
@@ -63,6 +65,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
         setSession(initialSession);
         setIsLoading(false);
       }
+
+      if (initialSession && isSessionValid(initialSession)) {
+        void syncUserLocationOnAuth();
+      }
     })();
 
     return () => {
@@ -101,6 +107,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const signIn = useCallback(async (credentials: SignInCredentials) => {
     const nextSession = await signInRequest(credentials);
     setSession(nextSession);
+    void syncUserLocationOnAuth();
   }, []);
 
   const signOut = useCallback(async () => {

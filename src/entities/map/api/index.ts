@@ -1,4 +1,4 @@
-import { fetchMapMarkers as fetchMapMarkersMock } from '@/mock';
+import { fetchCurrentUserMarker, fetchMapMarkers as fetchMapMarkersMock } from '@/mock';
 
 import type { MapMarker } from '../model';
 import { mapMapMarker } from './mappers';
@@ -20,3 +20,25 @@ export async function getMapMarkers(): Promise<MapMarker[]> {
   const data = (await response.json()) as MapMarker[];
   return data;
 }
+
+export async function getCurrentUserMarker(): Promise<MapMarker | null> {
+  if (!API_BASE_URL) {
+    const json = await fetchCurrentUserMarker();
+    return json ? mapMapMarker(json) : null;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/map/me/location`);
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error('Failed to load user location');
+  }
+
+  const data = (await response.json()) as MapMarker;
+  return data;
+}
+
+export { syncUserLocationOnAuth, updateUserLocation } from './sync-user-location';
