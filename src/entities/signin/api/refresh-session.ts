@@ -1,23 +1,15 @@
-import { SESSION_ACCESS_TTL_MS } from '../model/constants';
+import { fetchRefreshSession as fetchRefreshSessionMock } from '@/mock';
+
 import type { AuthSession } from '../model';
+import { mapAuthSession } from './mappers';
 import { saveStoredSession } from './session-storage';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
-function createSession(refreshToken: string): AuthSession {
-  const now = Date.now();
-
-  return {
-    accessToken: `access_${now}`,
-    refreshToken,
-    expiresAt: now + SESSION_ACCESS_TTL_MS,
-  };
-}
-
 async function requestSessionRefresh(refreshToken: string): Promise<AuthSession> {
   if (!API_BASE_URL) {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return createSession(refreshToken);
+    const json = await fetchRefreshSessionMock({ refresh_token: refreshToken });
+    return mapAuthSession(json);
   }
 
   const response = await fetch(`${API_BASE_URL}/auth/refresh`, {

@@ -7,3 +7,9 @@ export type User = {
   avatarUrl?: string;
   bio?: string;
 };
+
+export type UpdateUserPayload = {
+  username?: string;
+  displayName?: string;
+  bio?: string;
+};

@@ -1,24 +1,27 @@
-import { SESSION_ACCESS_TTL_MS } from '../model/constants';
+import { fetchSignIn as fetchSignInMock } from '@/mock';
+import { MockApiError } from '@/mock/utils';
+
 import type { AuthSession, SignInCredentials } from '../model';
-import { refreshSession } from './refresh-session';
+import { mapAuthSession } from './mappers';
 import { clearStoredSession, saveStoredSession } from './session-storage';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
-function createSession(refreshToken: string): AuthSession {
-  const now = Date.now();
-
-  return {
-    accessToken: `access_${now}`,
-    refreshToken,
-    expiresAt: now + SESSION_ACCESS_TTL_MS,
-  };
-}
-
 async function requestSignIn(credentials: SignInCredentials): Promise<AuthSession> {
   if (!API_BASE_URL) {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return createSession(`refresh_${credentials.phoneNumber}_${Date.now()}`);
+    try {
+      const json = await fetchSignInMock({
+        phone_number: credentials.phoneNumber,
+        sms_code: credentials.smsCode,
+      });
+      return mapAuthSession(json);
+    } catch (error) {
+      if (error instanceof MockApiError) {
+        throw new Error(error.message);
+      }
+
+      throw error;
+    }
   }
 
   const response = await fetch(`${API_BASE_URL}/auth/sign-in`, {
@@ -47,4 +50,4 @@ export async function signOut(): Promise<void> {
   await clearStoredSession();
 }
 
-export { refreshSession };
+export { refreshSession } from './refresh-session';

@@ -1,11 +1,16 @@
+import { Stack } from 'expo-router';
+
 import { AnimatedSplashOverlay } from '@/shared/components/animated-icon';
-import AppTabs from '@/shared/components/app-tabs';
 
 export default function AppLayout() {
   return (
     <>
       <AnimatedSplashOverlay />
-      <AppTabs />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="profile/edit" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="chat/[id]" options={{ presentation: 'modal' }} />
+      </Stack>
     </>
   );
 }
