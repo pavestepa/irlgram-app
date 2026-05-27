@@ -1,113 +1,41 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 
-import { getCurrentUser } from '@/entities/user/api';
+import { useChatRoomStore } from '../store/chat-room-store';
+import type { ChatId } from '../model';
 
-import { connectChatSocket, getChatMessages, sendChatSocketMessage } from '../api';
-import type { ChatId, ChatMessage } from '../model';
+const emptyRoom = {
+  messages: [],
+  currentUserId: null,
+  isLoading: true,
+  isSending: false,
+  isConnected: false,
+  error: null,
+} as const;
 
 export function useChatRoom(chatId: ChatId) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSending, setIsSending] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const seenMessageIds = useRef(new Set<string>());
-
-  const appendMessage = useCallback((message: ChatMessage) => {
-    if (seenMessageIds.current.has(message.id)) {
-      return;
-    }
-
-    seenMessageIds.current.add(message.id);
-    setMessages((current) => [...current, message]);
-  }, []);
+  const room = useChatRoomStore((state) => state.rooms[chatId] ?? emptyRoom);
+  const loadRoom = useChatRoomStore((state) => state.loadRoom);
+  const connectRoom = useChatRoomStore((state) => state.connectRoom);
+  const sendMessageAction = useChatRoomStore((state) => state.sendMessage);
+  const resetRoom = useChatRoomStore((state) => state.resetRoom);
 
   useEffect(() => {
-    let isMounted = true;
-    seenMessageIds.current.clear();
-
-    void (async () => {
-      try {
-        const [initialMessages, currentUser] = await Promise.all([
-          getChatMessages(chatId),
-          getCurrentUser(),
-        ]);
-
-        if (!isMounted) {
-          return;
-        }
-
-        initialMessages.forEach((message) => seenMessageIds.current.add(message.id));
-        setMessages(initialMessages);
-        setCurrentUserId(currentUser.id);
-        setError(null);
-      } catch {
-        if (isMounted) {
-          setError('Не удалось загрузить чат');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    })();
-
-    const disconnect = connectChatSocket(chatId, (event) => {
-      if (!isMounted) {
-        return;
-      }
-
-      if (event.type === 'connected') {
-        setIsConnected(true);
-        return;
-      }
-
-      if (event.type === 'message') {
-        appendMessage(event.message);
-        return;
-      }
-
-      setError(event.message);
-    });
+    void loadRoom(chatId);
+    const disconnect = connectRoom(chatId);
 
     return () => {
-      isMounted = false;
       disconnect();
-      setIsConnected(false);
+      resetRoom(chatId);
     };
-  }, [appendMessage, chatId]);
-
-  const sendMessage = useCallback(
-    async (text: string) => {
-      const trimmed = text.trim();
-
-      if (!trimmed) {
-        return;
-      }
-
-      setIsSending(true);
-
-      try {
-        const message = await sendChatSocketMessage(chatId, trimmed);
-        appendMessage(message);
-        setError(null);
-      } catch {
-        setError('Не удалось отправить сообщение');
-      } finally {
-        setIsSending(false);
-      }
-    },
-    [appendMessage, chatId],
-  );
+  }, [chatId, connectRoom, loadRoom, resetRoom]);
 
   return {
-    messages,
-    currentUserId,
-    isLoading,
-    isSending,
-    isConnected,
-    error,
-    sendMessage,
+    messages: room.messages,
+    currentUserId: room.currentUserId,
+    isLoading: room.isLoading,
+    isSending: room.isSending,
+    isConnected: room.isConnected,
+    error: room.error,
+    sendMessage: (text: string) => sendMessageAction(chatId, text),
   };
 }

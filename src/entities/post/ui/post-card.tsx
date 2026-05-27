@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/shared/components/themed-text';
 import { ThemedView } from '@/shared/components/themed-view';
@@ -26,7 +26,7 @@ function getInitials(displayName: string) {
     .join('');
 }
 
-export function PostCard({ post, author }: PostCardProps) {
+export function PostCard({ post, author, onCommentsPress }: PostCardProps) {
   const theme = useTheme();
 
   return (
@@ -59,9 +59,14 @@ export function PostCard({ post, author }: PostCardProps) {
         <ThemedText type="small" themeColor="textSecondary">
           {post.likeCount} лайков
         </ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          {post.commentCount} комментариев
-        </ThemedText>
+        <Pressable
+          disabled={!onCommentsPress}
+          onPress={onCommentsPress}
+          style={({ pressed }) => pressed && onCommentsPress && styles.pressed}>
+          <ThemedText type="small" themeColor="textSecondary">
+            {post.commentCount} комментариев
+          </ThemedText>
+        </Pressable>
       </View>
     </ThemedView>
   );
@@ -105,5 +110,8 @@ const styles = StyleSheet.create({
   stats: {
     flexDirection: 'row',
     gap: Spacing.three,
+  },
+  pressed: {
+    opacity: 0.7,
   },
 });

@@ -1,6 +1,7 @@
 import type {
   MockChatJson,
   MockChatMessageJson,
+  MockCommentJson,
   MockFriendJson,
   MockFriendRequestJson,
   MockMapMarkerJson,
@@ -13,6 +14,7 @@ export type MockState = {
   currentUserId: string;
   users: MockUserJson[];
   posts: MockPostJson[];
+  comments: MockCommentJson[];
   friends: MockFriendJson[];
   friendRequests: MockFriendRequestJson[];
   spheres: MockSphereJson[];
@@ -78,6 +80,47 @@ function createInitialState(currentUserId: string): MockState {
       created_at: '2026-05-26T12:15:00.000Z',
       like_count: 7,
       comment_count: 0,
+    },
+  ];
+
+  const comments: MockCommentJson[] = [
+    {
+      id: 'comment_1',
+      post_id: 'post_1',
+      author_id: 'user_ivan',
+      content: 'Согласен, классная погода!',
+      created_at: '2026-05-26T10:15:00.000Z',
+      like_count: 2,
+      liked_by_user_ids: ['user_anna', currentUserId],
+    },
+    {
+      id: 'comment_2',
+      post_id: 'post_1',
+      author_id: 'user_anna',
+      content: 'Спасибо!',
+      parent_comment_id: 'comment_1',
+      created_at: '2026-05-26T10:20:00.000Z',
+      like_count: 0,
+      liked_by_user_ids: [],
+    },
+    {
+      id: 'comment_3',
+      post_id: 'post_1',
+      author_id: currentUserId,
+      content: 'Я тоже выходил сегодня',
+      parent_comment_id: 'comment_1',
+      created_at: '2026-05-26T10:25:00.000Z',
+      like_count: 1,
+      liked_by_user_ids: ['user_anna'],
+    },
+    {
+      id: 'comment_4',
+      post_id: 'post_2',
+      author_id: 'user_anna',
+      content: 'Круто, mock API работает',
+      created_at: '2026-05-26T11:45:00.000Z',
+      like_count: 0,
+      liked_by_user_ids: [],
     },
   ];
 
@@ -176,6 +219,7 @@ function createInitialState(currentUserId: string): MockState {
     currentUserId,
     users,
     posts,
+    comments,
     friends,
     friendRequests,
     spheres,

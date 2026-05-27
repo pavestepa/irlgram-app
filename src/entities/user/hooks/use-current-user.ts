@@ -1,36 +1,24 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
-import { getCurrentUser } from '../api';
-import type { User } from '../model';
+import { useCurrentUserStore } from '../store/current-user-store';
 
 export function useCurrentUser() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadUser = useCallback(async () => {
-    try {
-      setError(null);
-      const data = await getCurrentUser();
-      setUser(data);
-    } catch {
-      setError('Не удалось загрузить профиль');
-    }
-  }, []);
-
-  const refresh = useCallback(async () => {
-    setIsRefreshing(true);
-    await loadUser();
-    setIsRefreshing(false);
-  }, [loadUser]);
+  const { user, isLoading, isRefreshing, error, ensureLoaded, refresh, setUser } = useCurrentUserStore(
+    useShallow((state) => ({
+      user: state.user,
+      isLoading: state.isLoading,
+      isRefreshing: state.isRefreshing,
+      error: state.error,
+      ensureLoaded: state.ensureLoaded,
+      refresh: state.refresh,
+      setUser: state.setUser,
+    })),
+  );
 
   useEffect(() => {
-    void (async () => {
-      await loadUser();
-      setIsLoading(false);
-    })();
-  }, [loadUser]);
+    void ensureLoaded();
+  }, [ensureLoaded]);
 
   return {
     user,

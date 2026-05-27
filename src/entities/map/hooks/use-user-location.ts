@@ -1,16 +1,25 @@
 import * as Location from 'expo-location';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { getCurrentUserMarker, updateUserLocation } from '../api';
 import { requestCurrentLocation } from '../api/location-access';
+import { useLocationStore } from '../store/location-store';
 import type { MapLocation } from '../model';
 
 const WATCH_DISTANCE_METERS = 10;
 
 export function useUserLocation() {
-  const [location, setLocation] = useState<MapLocation | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { location, isLoading, error, setLocation, setLoading, setError } = useLocationStore(
+    useShallow((state) => ({
+      location: state.location,
+      isLoading: state.isLoading,
+      error: state.error,
+      setLocation: state.setLocation,
+      setLoading: state.setLoading,
+      setError: state.setError,
+    })),
+  );
 
   useEffect(() => {
     let subscription: Location.LocationSubscription | null = null;
@@ -50,7 +59,7 @@ export function useUserLocation() {
         }
       } finally {
         if (isMounted) {
-          setIsLoading(false);
+          setLoading(false);
         }
       }
 
@@ -78,7 +87,7 @@ export function useUserLocation() {
       isMounted = false;
       subscription?.remove();
     };
-  }, []);
+  }, [setError, setLoading, setLocation]);
 
   return {
     location,

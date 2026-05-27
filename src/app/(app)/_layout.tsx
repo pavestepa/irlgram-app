@@ -10,6 +10,7 @@ export default function AppLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="profile/edit" options={{ presentation: 'modal' }} />
         <Stack.Screen name="chat/[id]" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="post/[id]" options={{ presentation: 'modal' }} />
       </Stack>
     </>
   );

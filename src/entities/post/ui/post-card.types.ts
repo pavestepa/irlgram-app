@@ -6,4 +6,5 @@ export type PostAuthor = Pick<User, 'id' | 'username' | 'displayName' | 'avatarU
 export type PostCardProps = {
   post: Post;
   author: PostAuthor;
+  onCommentsPress?: () => void;
 };

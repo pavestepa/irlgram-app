@@ -6,6 +6,7 @@ export { resetMockState, getMockState } from './state';
 export * from './fetch-auth';
 export * from './fetch-user';
 export * from './fetch-post';
+export * from './fetch-comment';
 export * from './fetch-friend';
 export * from './fetch-sphere';
 export * from './fetch-map';

@@ -1,4 +1,5 @@
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { usePosts } from '@/entities/post/hooks/use-posts';
@@ -54,7 +55,13 @@ export default function HomeScreen() {
               return null;
             }
 
-            return <PostCard post={item} author={author} />;
+            return (
+              <PostCard
+                post={item}
+                author={author}
+                onCommentsPress={() => router.push(`/post/${item.id}`)}
+              />
+            );
           }}
           ItemSeparatorComponent={() => <ThemedView style={styles.separator} />}
         />

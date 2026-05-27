@@ -43,6 +43,17 @@ export type MockPostJson = {
   comment_count: number;
 };
 
+export type MockCommentJson = {
+  id: string;
+  post_id: string;
+  author_id: string;
+  content: string;
+  parent_comment_id?: string;
+  created_at: string;
+  like_count: number;
+  liked_by_user_ids: string[];
+};
+
 export type MockFriendJson = {
   id: string;
   user: MockUserJson;
